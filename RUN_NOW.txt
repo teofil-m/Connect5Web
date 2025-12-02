@@ -1,0 +1,69 @@
+# 🎮 READY TO PLAY - Copy & Paste Commands
+
+## Fastest Way to Start
+
+**Copy these commands one at a time into PowerShell:**
+
+### Step 1: Start Backend (Terminal 1)
+```powershell
+cd d:\AI-training\Blocks\backend
+python game_server.py
+```
+
+Wait for this output:
+```
+ * Running on http://127.0.0.1:5000
+ * Press CTRL+C to quit
+```
+
+### Step 2: Start Frontend (Terminal 2 - NEW window)
+```powershell
+cd d:\AI-training\Blocks\frontend
+npm start
+```
+
+Wait for this output:
+```
+Angular Live Development Server is listening on localhost:4200
+```
+
+### Step 3: Open Browser
+```
+http://localhost:4200
+```
+
+**Done! Game is running! 🎉**
+
+---
+
+## Game Setup
+
+**Player 1 (First Window):**
+1. Enter name
+2. Click "Create Game"
+3. Wait for Player 2
+
+**Player 2 (Second Player):**
+1. Enter name
+2. Click "Join"
+3. Game starts!
+
+---
+
+## What's Fixed
+
+✅ Backend dependencies installed (Flask-SocketIO added)
+✅ Frontend npm fixed (Three.js version corrected)
+✅ Ready to run on your computer
+
+---
+
+## Need Help?
+
+- See: `QUICK_RUN.md` - Detailed running instructions
+- See: `ALL_FIXES_COMPLETE.md` - What was fixed
+- See: `00_START_HERE.md` - Full project overview
+
+---
+
+**That's it! Just run those 3 terminal commands and you're playing! 🚀**
