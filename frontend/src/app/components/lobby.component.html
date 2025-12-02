@@ -37,6 +37,27 @@
       </div>
     </div>
 
+    <div class="free-play-section">
+      <button 
+        (click)="toggleFreePlayInput()" 
+        class="btn btn-primary"
+        [disabled]="loading"
+      >
+        {{ showFreePlayInput ? 'Cancel' : 'Free Play' }}
+      </button>
+
+      <div *ngIf="showFreePlayInput" class="free-play-form">
+        <p class="free-play-info">Practice placing pieces on the board without opponents</p>
+        <button 
+          (click)="startFreePlay()" 
+          class="btn btn-success"
+          [disabled]="loading || playerName.trim() === ''"
+        >
+          {{ loading ? 'Starting...' : 'Start Free Play' }}
+        </button>
+      </div>
+    </div>
+
     <div *ngIf="errorMessage" class="error-message">
       {{ errorMessage }}
     </div>

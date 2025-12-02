@@ -2,9 +2,13 @@
   <div class="game-header">
     <div class="header-info">
       <h2>Connect 5 - 3D Game</h2>
-      <div class="player-info">
+      <div *ngIf="!isFreePlay" class="player-info">
         <p><strong>You:</strong> {{ playerName }}</p>
         <p *ngIf="gameState"><strong>Current Turn:</strong> {{ gameState.current_player }}</p>
+      </div>
+      <div *ngIf="isFreePlay" class="player-info">
+        <p><strong>Player:</strong> {{ playerName }}</p>
+        <p><strong>Mode:</strong> Free Play</p>
       </div>
     </div>
     <button (click)="goBack()" class="btn btn-back">Back to Lobby</button>
@@ -32,7 +36,7 @@
           <p>Players: {{ (gameState.players | keyvalue).length }}/2</p>
         </div>
 
-        <div *ngIf="gameState.started" class="game-status">
+        <div *ngIf="!isFreePlay && gameState.started" class="game-status">
           <div class="turn-indicator">
             <p>Current Turn: <strong>{{ gameState.current_player }}</strong></p>
             <p *ngIf="gameState.current_player === playerName" class="your-turn">YOUR TURN</p>
@@ -42,6 +46,11 @@
             <h3>Game Over!</h3>
             <p *ngIf="gameState.winner">Player {{ gameState.winner }} wins!</p>
           </div>
+        </div>
+
+        <div *ngIf="isFreePlay && gameState.started" class="free-play-status">
+          <h3>Free Play Mode</h3>
+          <p>Place pieces on the board freely!</p>
         </div>
 
         <div *ngIf="errorMessage" class="error-message">
@@ -89,7 +98,7 @@
               class="position-btn"
               [class.selected-orientation]="move.orientation === selectedOrientation"
               [class.active-preview]="previewMove?.line === move.line && previewMove?.height === move.height && previewMove?.orientation === move.orientation"
-              [disabled]="!gameState.started || gameState.current_player !== playerName || move.orientation !== selectedOrientation"
+              [disabled]="!gameState.started || (!isFreePlay && gameState.current_player !== playerName) || move.orientation !== selectedOrientation"
               title="Line: {{ move.line }}, Height: {{ move.height }}, {{ move.orientation === 'v' ? 'Vertical' : 'Horizontal' }}"
             >
               L{{ move.line }} H{{ move.height }} {{ move.orientation === 'v' ? '↕' : '↔' }}

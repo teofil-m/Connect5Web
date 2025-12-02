@@ -67,6 +67,28 @@ h2 {
   font-size: 1em;
 }
 
+.free-play-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f0f4ff;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.free-play-form {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+}
+
+.free-play-info {
+  margin: 0 0 15px 0;
+  color: #666;
+  font-size: 0.9em;
+  font-style: italic;
+}
+
 .error-message {
   background: #fee;
   color: #c33;

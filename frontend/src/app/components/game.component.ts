@@ -17,6 +17,7 @@ export class GameComponent implements OnInit, OnDestroy {
   gameId: string = '';
   playerName: string = '';
   isHost: boolean = false;
+  isFreePlay: boolean = false;
   gameState: GameState | null = null;
   errorMessage: string = '';
   selectedOrientation: string = 'v'; // 'v' for vertical, 'h' for horizontal
@@ -41,6 +42,7 @@ export class GameComponent implements OnInit, OnDestroy {
     if (state) {
       this.playerName = state['playerName'] || '';
       this.isHost = state['isHost'] || false;
+      this.isFreePlay = state['isFreePlay'] || false;
     }
   }
 
@@ -92,6 +94,10 @@ export class GameComponent implements OnInit, OnDestroy {
       next: (state) => {
         this.gameState = state;
         this.gameService.updateGameState(state);
+        // Auto-start game for free play
+        if (this.isFreePlay && !state.started) {
+          setTimeout(() => this.startGame(), 500);
+        }
       },
       error: (err) => {
         console.error('Error loading game state:', err);
@@ -348,7 +354,8 @@ export class GameComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.gameState.current_player !== this.playerName) {
+    // In free play mode, skip turn check since there's only one player
+    if (!this.isFreePlay && this.gameState.current_player !== this.playerName) {
       this.errorMessage = 'Not your turn';
       return;
     }

@@ -27,6 +27,7 @@ class GameSession:
         self.started = False
         self.created_at = datetime.now()
         self.current_player_name = host_name
+        self.is_free_play = False
         
     def add_player(self, player_name):
         if len(self.players) >= 2:
@@ -76,7 +77,54 @@ class GameSession:
             'board': board_state['board'],
             'game_over': board_state['game_over'],
             'winner': board_state['winner'],
-            'valid_moves': self.board.get_valid_moves()
+            'valid_moves': self.board.get_valid_moves(),
+            'is_free_play': self.is_free_play
+        }
+
+
+class FreePlayGameSession:
+    """Game session for single-player free play mode"""
+    def __init__(self, player_name):
+        self.id = str(uuid.uuid4())[:8]
+        self.host_name = player_name
+        self.players = {player_name: 1}  # Single player as player 1
+        self.board = GameBoard()
+        self.started = False
+        self.created_at = datetime.now()
+        self.current_player_name = player_name
+        self.is_free_play = True
+    
+    def start_game(self):
+        """Start the free play game"""
+        self.started = True
+        return True
+    
+    def place_block(self, player_name, line, height, orientation='v'):
+        """Place a block in free play mode (no turn restrictions)"""
+        if not self.started:
+            return False, "Game not started"
+        
+        # In free play, always allow moves from the single player
+        player_id = self.players[player_name]
+        
+        if self.board.place_block(line, height, player_id, orientation):
+            return True, "Block placed successfully"
+        else:
+            return False, "Invalid move"
+    
+    def get_state(self):
+        board_state = self.board.get_board_state()
+        return {
+            'id': self.id,
+            'host': self.host_name,
+            'players': self.players,
+            'started': self.started,
+            'current_player': self.current_player_name,
+            'board': board_state['board'],
+            'game_over': board_state['game_over'],
+            'winner': board_state['winner'],
+            'valid_moves': self.board.get_valid_moves(),
+            'is_free_play': self.is_free_play
         }
 
 
@@ -114,6 +162,29 @@ def create_game():
         'game_id': game.id,
         'host': host_name,
         'message': 'Game created successfully'
+    })
+
+
+@app.route('/api/games/free-play', methods=['POST'])
+def create_free_play_game():
+    """Create a free play game for single player"""
+    data = request.json
+    player_name = data.get('player_name', 'Player')
+    
+    if not player_name or len(player_name) == 0:
+        return jsonify({'error': 'Invalid player name'}), 400
+    
+    game = FreePlayGameSession(player_name)
+    games[game.id] = game
+    players[player_name] = game.id
+    
+    # Auto-start free play games
+    game.start_game()
+    
+    return jsonify({
+        'game_id': game.id,
+        'host': player_name,
+        'message': 'Free play game created successfully'
     })
 
 

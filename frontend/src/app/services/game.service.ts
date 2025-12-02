@@ -14,6 +14,7 @@ export interface GameState {
   game_over: boolean;
   winner: number | null;
   valid_moves: Array<{ line: number; height: number; orientation: string }>;
+  is_free_play?: boolean;
 }
 
 export interface AvailableGame {
@@ -67,6 +68,10 @@ export class GameService {
 
   createGame(hostName: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/games`, { host_name: hostName });
+  }
+
+  createFreePlayGame(playerName: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/games/free-play`, { player_name: playerName });
   }
 
   joinGame(gameId: string, playerName: string): Observable<any> {

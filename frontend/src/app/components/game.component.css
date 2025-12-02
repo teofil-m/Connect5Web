@@ -123,6 +123,26 @@ canvas {
   margin: 15px 0;
 }
 
+.free-play-status {
+  background: rgba(78, 205, 196, 0.2);
+  border-left: 4px solid #4ecdc4;
+  padding: 12px;
+  border-radius: 5px;
+  margin: 15px 0;
+}
+
+.free-play-status h3 {
+  color: #4ecdc4;
+  margin: 0 0 8px 0;
+  font-size: 1.1em;
+}
+
+.free-play-status p {
+  margin: 5px 0;
+  color: #b0e8e3;
+  font-size: 0.9em;
+}
+
 .turn-indicator {
   background: rgba(102, 126, 234, 0.2);
   border-left: 4px solid #667eea;

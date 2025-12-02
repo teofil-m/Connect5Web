@@ -18,6 +18,7 @@ export class LobbyComponent implements OnInit {
   loading = false;
   hostName: string = '';
   errorMessage: string = '';
+  showFreePlayInput = false;
 
   constructor(
     private gameService: GameService,
@@ -86,6 +87,33 @@ export class LobbyComponent implements OnInit {
 
   toggleCreateGame() {
     this.showCreateGame = !this.showCreateGame;
+    this.errorMessage = '';
+  }
+
+  startFreePlay() {
+    if (!this.playerName.trim()) {
+      this.errorMessage = 'Please enter your name';
+      return;
+    }
+
+    this.loading = true;
+    // Create a special free play game
+    this.gameService.createFreePlayGame(this.playerName).subscribe({
+      next: (response) => {
+        this.router.navigate(['/game', response.game_id], {
+          state: { playerName: this.playerName, isHost: true, isFreePlay: true }
+        });
+      },
+      error: (err) => {
+        console.error('Error starting free play:', err);
+        this.errorMessage = 'Failed to start free play';
+        this.loading = false;
+      }
+    });
+  }
+
+  toggleFreePlayInput() {
+    this.showFreePlayInput = !this.showFreePlayInput;
     this.errorMessage = '';
   }
 }
