@@ -1,0 +1,102 @@
+<div class="game-container">
+  <div class="game-header">
+    <div class="header-info">
+      <h2>Connect 5 - 3D Game</h2>
+      <div class="player-info">
+        <p><strong>You:</strong> {{ playerName }}</p>
+        <p *ngIf="gameState"><strong>Current Turn:</strong> {{ gameState.current_player }}</p>
+      </div>
+    </div>
+    <button (click)="goBack()" class="btn btn-back">Back to Lobby</button>
+  </div>
+
+  <div class="game-content">
+    <div class="canvas-container">
+      <canvas #gameCanvas></canvas>
+    </div>
+
+    <div class="game-panel">
+      <div *ngIf="gameState" class="game-info">
+        <h3>Game Info</h3>
+        
+        <div class="players-list">
+          <h4>Players</h4>
+          <div *ngFor="let player of gameState.players | keyvalue" class="player-item">
+            <span>{{ player.key }}</span>
+            <span *ngIf="player.value" class="player-id">Player {{ player.value }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="!gameState.started" class="waiting-message">
+          <p>Waiting for players to join...</p>
+          <p>Players: {{ (gameState.players | keyvalue).length }}/2</p>
+        </div>
+
+        <div *ngIf="gameState.started" class="game-status">
+          <div class="turn-indicator">
+            <p>Current Turn: <strong>{{ gameState.current_player }}</strong></p>
+            <p *ngIf="gameState.current_player === playerName" class="your-turn">YOUR TURN</p>
+          </div>
+
+          <div *ngIf="gameState.game_over" class="game-over">
+            <h3>Game Over!</h3>
+            <p *ngIf="gameState.winner">Player {{ gameState.winner }} wins!</p>
+          </div>
+        </div>
+
+        <div *ngIf="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+
+        <div *ngIf="gameState.started" class="orientation-selector">
+          <h4>Block Orientation</h4>
+          <div class="orientation-buttons">
+            <button 
+              (click)="selectedOrientation = 'v'"
+              [class.selected]="selectedOrientation === 'v'"
+              class="orientation-btn"
+            >
+              ⬆️ Vertical
+            </button>
+            <button 
+              (click)="selectedOrientation = 'h'"
+              [class.selected]="selectedOrientation === 'h'"
+              class="orientation-btn"
+            >
+              ⬅️ Horizontal
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="gameState.started && pendingMove" class="move-confirmation">
+          <div class="pending-move-info">
+            <p><strong>Pending Move:</strong> Line {{ pendingMove.line }}, Height {{ pendingMove.height }} ({{ pendingMove.orientation === 'v' ? 'Vertical' : 'Horizontal' }})</p>
+          </div>
+          <div class="move-buttons">
+            <button (click)="submitMove()" class="btn-submit">✓ Submit Move</button>
+            <button (click)="undoMove()" class="btn-undo">✕ Undo</button>
+          </div>
+        </div>
+
+        <div class="board-grid">
+          <h4>Place Block</h4>
+          <div class="board-positions">
+            <button 
+              *ngFor="let move of gameState.valid_moves" 
+              (click)="makeMove(move.line, move.height)"
+              (mouseenter)="previewMove = { line: move.line, height: move.height, orientation: move.orientation }"
+              (mouseleave)="previewMove = pendingMove"
+              class="position-btn"
+              [class.selected-orientation]="move.orientation === selectedOrientation"
+              [class.active-preview]="previewMove?.line === move.line && previewMove?.height === move.height && previewMove?.orientation === move.orientation"
+              [disabled]="!gameState.started || gameState.current_player !== playerName || move.orientation !== selectedOrientation"
+              title="Line: {{ move.line }}, Height: {{ move.height }}, {{ move.orientation === 'v' ? 'Vertical' : 'Horizontal' }}"
+            >
+              L{{ move.line }} H{{ move.height }} {{ move.orientation === 'v' ? '↕' : '↔' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

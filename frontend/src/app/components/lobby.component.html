@@ -1,0 +1,66 @@
+<div class="lobby-container">
+  <div class="lobby-content">
+    <h1>Connect 5 - 3D Game</h1>
+    
+    <div class="player-input">
+      <input 
+        type="text" 
+        [(ngModel)]="playerName" 
+        placeholder="Enter your name"
+        class="name-input"
+      >
+    </div>
+
+    <div class="create-game-section">
+      <button 
+        (click)="toggleCreateGame()" 
+        class="btn btn-primary"
+        [disabled]="loading"
+      >
+        {{ showCreateGame ? 'Cancel' : 'Create Game' }}
+      </button>
+
+      <div *ngIf="showCreateGame" class="create-game-form">
+        <input 
+          type="text" 
+          [(ngModel)]="hostName" 
+          placeholder="Host name (your name)"
+          class="name-input"
+        >
+        <button 
+          (click)="createGame()" 
+          class="btn btn-success"
+          [disabled]="loading"
+        >
+          {{ loading ? 'Creating...' : 'Create' }}
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
+    <div class="games-list">
+      <h2>Available Games</h2>
+      <div *ngIf="availableGames.length === 0" class="no-games">
+        <p>No games available. Create one to get started!</p>
+      </div>
+      
+      <div *ngFor="let game of availableGames" class="game-card">
+        <div class="game-info">
+          <p><strong>Host:</strong> {{ game.host }}</p>
+          <p><strong>Players:</strong> {{ game.players_count }}/2</p>
+          <p><strong>Created:</strong> {{ game.created_at | date:'short' }}</p>
+        </div>
+        <button 
+          (click)="joinGame(game.id)" 
+          class="btn btn-secondary"
+          [disabled]="loading || playerName.trim() === ''"
+        >
+          {{ loading ? 'Joining...' : 'Join' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
