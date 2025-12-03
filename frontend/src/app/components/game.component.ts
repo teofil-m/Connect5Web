@@ -150,6 +150,7 @@ export class GameComponent implements OnInit, OnDestroy {
 
     // Mouse events
     canvas.addEventListener('click', (event) => this.onCanvasClick(event));
+    canvas.addEventListener('mousemove', (event) => this.onCanvasHover(event));
     window.addEventListener('resize', () => this.onWindowResize());
 
     this.animate();
@@ -233,15 +234,15 @@ export class GameComponent implements OnInit, OnDestroy {
     let posX: number, posY: number, posZ: number;
 
     if (orientation === 'v') {
-      // Vertical: 1x1x2 (occupies two height levels)
-      geometry = new THREE.BoxGeometry(1.0, 1.0, 2.0);
+      // Vertical: 1 unit wide (X), 2 units tall (Y), 1 unit deep (Z)
+      geometry = new THREE.BoxGeometry(1.0, 2.0, 1.0);
       block = new THREE.Mesh(geometry, material);
       posX = line;
       posY = height + 0.5; // Center of the 2-unit height
       posZ = 4.5;
       block.userData = { line, height, playerId, orientation: 'v' };
     } else {
-      // Horizontal: 2x1x1 (occupies two line positions)
+      // Horizontal: 2 units wide (X), 1 unit tall (Y), 1 unit deep (Z)
       geometry = new THREE.BoxGeometry(2.0, 1.0, 1.0);
       block = new THREE.Mesh(geometry, material);
       posX = line + 0.5; // Center of the 2-unit width
@@ -270,16 +271,17 @@ export class GameComponent implements OnInit, OnDestroy {
     }
 
     const geometry: THREE.BoxGeometry = orientation === 'v' 
-      ? new THREE.BoxGeometry(1.0, 1.0, 2.0)
-      : new THREE.BoxGeometry(2.0, 1.0, 1.0);
+      ? new THREE.BoxGeometry(1.0, 2.0, 1.0)  // Vertical: 1 wide, 2 tall, 1 deep
+      : new THREE.BoxGeometry(2.0, 1.0, 1.0); // Horizontal: 2 wide, 1 tall, 1 deep
 
-    // Semi-transparent preview material - white/light color
+    // Semi-transparent preview material - use player's color with transparency
+    const currentPlayerColor = this.gameState?.players[this.playerName] === 1 ? 0xff6b6b : 0x4ecdc4;
     const material = new THREE.MeshPhongMaterial({
-      color: 0xffffff,
+      color: currentPlayerColor,
       shininess: 50,
       transparent: true,
-      opacity: 0.4,
-      emissive: 0x888888
+      opacity: 0.35,
+      emissive: 0x333333
     });
 
     this.previewBlock = new THREE.Mesh(geometry, material);
@@ -303,7 +305,7 @@ export class GameComponent implements OnInit, OnDestroy {
       color: 0xffff00,
       linewidth: 2,
       transparent: true,
-      opacity: 0.7
+      opacity: 0.9
     });
     const wireframe = new THREE.LineSegments(edges, lineColor);
     this.previewBlock.add(wireframe);
@@ -348,6 +350,41 @@ export class GameComponent implements OnInit, OnDestroy {
     }
   }
 
+  private onCanvasHover(event: MouseEvent) {
+    if (!this.scene || !this.camera || !this.renderer || !this.gameState || !this.gameState.started || this.pendingMove) return;
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    const canvas = this.canvasRef?.nativeElement;
+    const rect = canvas.getBoundingClientRect();
+
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, this.camera);
+    
+    // Check for grid position intersection
+    const gridPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -4.5);
+    const intersectionPoint = new THREE.Vector3();
+    raycaster.ray.intersectPlane(gridPlane, intersectionPoint);
+    
+    const line = Math.round(intersectionPoint.x - 0.5);
+    const height = Math.round(intersectionPoint.y - 0.5);
+    
+    // Show preview if hovering over valid empty position
+    if (line >= 0 && line < 9 && height >= 0 && height < 9 && this.gameState.board[line][height] === null) {
+      this.previewMove = { line, height, orientation: this.selectedOrientation };
+      this.updateVisualization();
+    } else {
+      // Clear preview if not over valid position
+      if (!this.pendingMove) {
+        this.previewMove = null;
+        this.updateVisualization();
+      }
+    }
+  }
+
   makeMove(line: number, height: number) {
     if (!this.gameState || this.gameState.game_over) {
       this.errorMessage = 'Game is over';
@@ -364,6 +401,9 @@ export class GameComponent implements OnInit, OnDestroy {
     this.pendingMove = { line, height, orientation: this.selectedOrientation };
     this.previewMove = { line, height, orientation: this.selectedOrientation };
     this.errorMessage = '';
+    
+    // Update visualization to show preview immediately
+    this.updateVisualization();
   }
 
   submitMove() {
@@ -397,6 +437,15 @@ export class GameComponent implements OnInit, OnDestroy {
     this.pendingMove = null;
     this.previewMove = null;
     this.errorMessage = '';
+  }
+
+  setOrientation(orientation: string) {
+    this.selectedOrientation = orientation;
+    // Update preview if it exists
+    if (this.previewMove) {
+      this.previewMove.orientation = orientation;
+      this.updateVisualization();
+    }
   }
 
   private animate = () => {

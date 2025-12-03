@@ -61,14 +61,14 @@
           <h4>Block Orientation</h4>
           <div class="orientation-buttons">
             <button 
-              (click)="selectedOrientation = 'v'"
+              (click)="setOrientation('v')"
               [class.selected]="selectedOrientation === 'v'"
               class="orientation-btn"
             >
               ⬆️ Vertical
             </button>
             <button 
-              (click)="selectedOrientation = 'h'"
+              (click)="setOrientation('h')"
               [class.selected]="selectedOrientation === 'h'"
               class="orientation-btn"
             >
